@@ -11,7 +11,8 @@ load_dotenv()
 app = Flask(__name__)
 
 # Configurar CORS
-CORS(app, origins=["http://localhost:3000"])
+CORS(app, origins=["http://localhost:5173"])
+
 
 # Configuración de la base de datos MySQL
 DB_CONFIG = {
