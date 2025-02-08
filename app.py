@@ -19,7 +19,7 @@ DB_CONFIG = {
     "user": os.getenv("DB_USER"),
     "password": os.getenv("DB_PASSWORD"),
     "database": os.getenv("DB_NAME"),
-    "port": int(os.getenv("DB_PORT")),
+    # "port": int(os.getenv("DB_PORT")),
 }
 
 # Configuración de Cloudinary
@@ -36,6 +36,7 @@ def get_db_connection():
 
 # Crear la base de datos si no existe
 def init_db():
+    print(DB_CONFIG.get("port"))
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''
