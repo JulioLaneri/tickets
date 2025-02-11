@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, origins=[os.getenv("*")])
+CORS(app, origins=["*"])
 
 # Configuración de la base de datos MySQL
 DB_CONFIG = {
