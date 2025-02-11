@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, origins=["*"])
+CORS(app, origins=[os.getenv("FRONTEND_URL")])
 
 # Configuración de la base de datos MySQL
 DB_CONFIG = {
