@@ -4,6 +4,7 @@ import mysql.connector
 import os
 import qrcode
 from dotenv import load_dotenv
+from datetime import datetime
 
 # Cargar variables de entorno
 load_dotenv()
@@ -75,30 +76,39 @@ def create_ticket():
         conn.close()
 
 # Ruta para escanear un ticket
+
 @app.route("/scan_ticket/<qr_code>", methods=["GET"])
 def scan_ticket(qr_code):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT id, name, email, event, status FROM tickets WHERE qr_code = %s", (qr_code,))
+    cursor.execute("SELECT id, name, email, event, status, scanned_at FROM tickets WHERE qr_code = %s", (qr_code,))
     ticket = cursor.fetchone()
 
     if not ticket:
-        return jsonify({"error": "Invalid ticket"}), 404
+        return jsonify({"error": "Código QR inválido", "color": "red"}), 404
 
     if ticket["status"] == "inactive":
-        return jsonify({"error": "Ticket already used"}), 400
+        scanned_at = ticket["scanned_at"].strftime("%d/%m/%Y %H:%M:%S") if ticket["scanned_at"] else "Desconocido"
+        return jsonify({
+            "error": "Ticket ya utilizado",
+            "color": "red",
+            "scanned_at": scanned_at
+        }), 400
 
-    # Marcar el ticket como usado
-    cursor.execute("UPDATE tickets SET status = 'inactive', scanned_at = NOW() WHERE qr_code = %s", (qr_code,))
+    # Marcar el ticket como usado con fecha y hora de escaneo
+    scanned_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute("UPDATE tickets SET status = 'inactive', scanned_at = %s WHERE qr_code = %s", (scanned_at, qr_code))
     conn.commit()
-
-    ticket["status"] = "inactive"
 
     cursor.close()
     conn.close()
 
-    return jsonify({"message": "Ticket validated", "ticket": ticket})
+    return jsonify({
+        "message": f"Bienvenido, {ticket['name']}! Disfruta el evento {ticket['event']}",
+        "color": "green",
+        "scanned_at": scanned_at
+    })
 
 # Ruta para obtener todos los tickets
 @app.route("/get_tickets", methods=["GET"])
